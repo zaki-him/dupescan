@@ -52,7 +52,16 @@ export const findDuplicate = async (targetPath: string, interactive: boolean): P
           }
         }
         else if(action === "move"){
-          
+          const duplicateFolder = path.join(absPath, "duplicates")
+          if(!fs.existsSync(duplicateFolder)){
+            fs.mkdirSync(duplicateFolder)
+          }
+
+          for (let i = 1; i < hashFiles.length; i++) {
+            const newPath = path.join(duplicateFolder, path.basename(hashFiles[i]!))
+            fs.renameSync(hashFiles[i] as fs.PathLike, newPath)
+            console.log(`Moved ${hashFiles[i]} -> ${newPath}`)
+          }
         }
       }
     }

@@ -16,3 +16,5 @@ program
 .action(async (option: Option) => {
   await findDuplicate(option.path!, option.inquirer ?? false)
 })
+
+program.parse(process.argv)
