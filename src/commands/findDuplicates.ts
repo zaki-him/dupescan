@@ -1,22 +1,10 @@
 import chalk from 'chalk'
-import fs, { readFileSync } from 'fs'
+import fs from 'fs'
 import path from 'path'
-import crypto, { createHash } from 'crypto'
+import { getFileHash } from '../functions/getFileHash.js'
+import { askChoices } from '../functions/askChoices.js'
 
-const getFileHash = (filePath: string): string => {
-  //read file contents
-  const fileBuffer = readFileSync(filePath)
-
-  //create a hash object
-  const hash = createHash('sha256')
-  
-  //pass the file buffer to the hash object
-  hash.update(fileBuffer)
-
-  return hash.digest('hex')
-}
-
-export const findDuplicate = (targetPath: string): void => {
+export const findDuplicate = async (targetPath: string, interactive: boolean): Promise<void> => {
   const absPath = path.resolve(targetPath)
 
   if(!fs.existsSync(absPath)){
@@ -47,11 +35,25 @@ export const findDuplicate = (targetPath: string): void => {
     }
   }
 
-  for(const [hash, hashedFiles] of hashMap.entries()){
-    if (hashedFiles.length > 1) {
+  for(const [hash, hashFiles] of hashMap.entries()){
+    if (hashFiles.length > 1) {
       console.log(`${chalk.bgWhite('Duplicated files:')} \n`)
-      for(const f of hashedFiles){
+      for(const f of hashFiles){
         console.log(' -', f)
+      }
+
+      if(interactive){
+        const action = await askChoices()
+
+        if(action === "delete"){
+          for(let i = 1; i < hashFiles.length; i++){
+            fs.unlinkSync(hashFiles[i] as fs.PathLike)
+            console.log("Deleted all duplicates")
+          }
+        }
+        else if(action === "move"){
+          
+        }
       }
     }
   }
